@@ -7,6 +7,11 @@ import { ProductionTypeConfig } from "../types";
 import { StandardDrawer } from "../ui/StandardDrawer";
 import { StandardModal } from "../ui/StandardModal";
 
+const SETTINGS_SECTIONS = [
+  { id: "production-types", title: "Production Types", icon: "tune" },
+  { id: "sources", title: "Sources", icon: "hub" },
+];
+
 export function SettingsModule() {
   const [productionTypes, setProductionTypes] = React.useContext(
     ProductionTypesContext,
@@ -50,6 +55,7 @@ export function SettingsModule() {
 
   const [editingSource, setEditingSource] = useState<any | null>(null);
   const [isDeletingSourceId, setIsDeletingSourceId] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState(SETTINGS_SECTIONS[0].id);
 
   const handleSaveType = (type: ProductionTypeConfig) => {
     if (!type.id) {
@@ -100,19 +106,38 @@ export function SettingsModule() {
   };
 
   return (
-    <div className="col-span-12 space-y-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Settings
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage external resources, variables, and platform configurations.
+    <>
+      <div className="col-span-12 lg:col-span-3 flex flex-col gap-6 lg:self-start mb-6 md:mb-8 lg:mb-0">
+        <div className="w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-1">Settings</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Manage variables and platform configurations.
           </p>
+          <div className="flex flex-col gap-3">
+            {SETTINGS_SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-colors ${
+                  activeSection === section.id
+                    ? "border-primary bg-[#f0f7ff] shadow-sm"
+                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[24px] text-[#cc0000]">
+                  {section.icon}
+                </span>
+                <span className="font-semibold text-gray-800 text-sm">
+                  {section.title}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="col-span-12 lg:col-span-9 flex flex-col gap-6">
+        {activeSection === "production-types" && (
         <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
@@ -184,7 +209,8 @@ export function SettingsModule() {
             })}
           </div>
         </div>
-
+        )}
+        {activeSection === "sources" && (
         <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
@@ -242,6 +268,7 @@ export function SettingsModule() {
             })}
           </div>
         </div>
+        )}
       </div>
 
       <StandardModal
@@ -432,6 +459,6 @@ export function SettingsModule() {
           Are you sure you want to delete this Source? This cannot be undone.
         </p>
       </StandardModal>
-    </div>
+    </>
   );
 }

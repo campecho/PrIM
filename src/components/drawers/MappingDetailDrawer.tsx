@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { StandardDrawer } from "../../ui/StandardDrawer";
+import { Button } from "../../ui/Button";
 
 export function MappingDetailDrawer({
   selectedMapping,
   onClose,
   onSave,
+  onDelete,
   sources,
 }: {
   selectedMapping: any;
   onClose: () => void;
   onSave: (mapping: any) => void;
+  onDelete?: () => void;
   sources: any[];
 }) {
   const [editingMapping, setEditingMapping] = useState<any>(selectedMapping || null);
@@ -23,8 +26,34 @@ export function MappingDetailDrawer({
       isOpen={!!selectedMapping}
       onClose={onClose}
       title={selectedMapping?.externalItemId ? "Edit Mapping: " + selectedMapping.externalItemId : "New Mapping"}
-      onSave={() => onSave(editingMapping)}
-      saveDisabled={!editingMapping?.externalItemId?.trim()}
+      footer={
+        <div className="flex items-center justify-between w-full">
+          {onDelete ? (
+            <Button
+              variant="ghost"
+              leadingIcon="delete"
+              onClick={onDelete}
+              className="!text-primary hover:!bg-red-50"
+            >
+              Delete
+            </Button>
+          ) : (
+            <span />
+          )}
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => onSave(editingMapping)}
+              disabled={!editingMapping?.externalItemId?.trim()}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      }
     >
       {selectedMapping && (
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 w-full">

@@ -429,7 +429,6 @@ export function ProductsModule() {
                       <th className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                         Source
                       </th>
-                      <th className="px-5 py-3 w-20"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -454,8 +453,13 @@ export function ProductsModule() {
                           key={index}
                           className="hover:bg-gray-50/50 transition-colors"
                         >
-                          <td className="px-5 py-4 text-sm font-medium text-gray-900 break-words max-w-[200px]">
-                            {mapping.externalItemId}
+                          <td className="px-5 py-4 text-sm break-words max-w-[200px]">
+                            <button
+                              onClick={() => setSelectedMapping(mapping)}
+                              className="text-[#cc0000] hover:underline font-semibold text-left"
+                            >
+                              {mapping.externalItemId}
+                            </button>
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap">
                             {mapping.internalItemId || mapping.sku}
@@ -471,36 +475,6 @@ export function ProductsModule() {
                           </td>
                           <td className="px-5 py-4 text-sm text-gray-600">
                             {sources.find(s => s.id === mapping.sourceId)?.name || mapping.sourceId || mapping.source}
-                          </td>
-                          <td className="px-5 py-4 text-sm text-right whitespace-nowrap">
-                            <button
-                              onClick={() => setSelectedMapping(mapping)}
-                              className="text-[#0056b3] hover:text-[#003d82] p-1.5 transition-colors"
-                              title="Edit"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                edit
-                              </span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    "Are you sure you want to delete this mapping?"
-                                  )
-                                ) {
-                                  setMappings(
-                                    mappings.filter((m) => m.id !== mapping.id)
-                                  );
-                                }
-                              }}
-                              className="text-[#cc0000] hover:text-[#990000] p-1.5 transition-colors ml-1"
-                              title="Delete"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                delete
-                              </span>
-                            </button>
                           </td>
                         </tr>
                       ))}
@@ -525,6 +499,18 @@ export function ProductsModule() {
           });
           setSelectedMapping(null);
         }}
+        onDelete={
+          selectedMapping && mappings.some((m) => m.id === selectedMapping.id)
+            ? () => {
+                if (confirm("Are you sure you want to delete this mapping?")) {
+                  setMappings((prev) =>
+                    prev.filter((m) => m.id !== selectedMapping.id),
+                  );
+                  setSelectedMapping(null);
+                }
+              }
+            : undefined
+        }
       />
       <PrintSpecDetailDrawer
         selectedSpec={selectedPrintSpec}

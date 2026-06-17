@@ -133,22 +133,22 @@ export function ProductsModule() {
         alert("The selected file is empty.");
         return;
       }
+      const str = (v: any) => (v == null ? "" : String(v));
       const rows = raw.map((row: any) => ({
         id: row.ID || crypto.randomUUID(),
-        externalItemId: row["External Item ID"] ?? "",
-        internalItemId:
+        externalItemId: str(row["External Item ID"]),
+        internalItemId: str(
           row["Internal Item ID (SKU)"] ??
-          row["Internal Item ID"] ??
-          row.SKU ??
-          "",
-        qtyModifyType: row["QTY Modify Type"] || "none",
-        qtyModifier:
-          row["QTY Modifier"] != null ? String(row["QTY Modifier"]) : "",
-        description: row.Description ?? "",
-        specType: row["Spec Type"] || "None assigned",
-        specValue: row["Spec Value"] ?? "",
+            row["Internal Item ID"] ??
+            row.SKU,
+        ),
+        qtyModifyType: str(row["QTY Modify Type"]) || "none",
+        qtyModifier: row["QTY Modifier"] != null ? String(row["QTY Modifier"]) : "",
+        description: str(row.Description),
+        specType: str(row["Spec Type"]) || "None assigned",
+        specValue: str(row["Spec Value"]),
         sourceId:
-          row["Source ID"] ||
+          str(row["Source ID"]) ||
           sources.find((s) => s.name === row.Source)?.id ||
           "",
       }));
@@ -562,21 +562,22 @@ export function ProductsModule() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {mappings
-                      .filter(
-                        (mapping) =>
-                          (mapping.externalItemId || "")
-                            .toLowerCase()
-                            .includes(mappingsSearchTerm.toLowerCase()) ||
-                          (mapping.internalItemId || mapping.sku || "")
-                            .toLowerCase()
-                            .includes(mappingsSearchTerm.toLowerCase()) ||
-                          (mapping.description || "")
-                            .toLowerCase()
-                            .includes(mappingsSearchTerm.toLowerCase()) ||
-                          (sources.find(s => s.id === mapping.sourceId)?.name || mapping.sourceId || mapping.source || "")
-                            .toLowerCase()
-                            .includes(mappingsSearchTerm.toLowerCase()),
-                      )
+                      .filter((mapping) => {
+                        const q = mappingsSearchTerm.toLowerCase();
+                        const has = (v: any) =>
+                          String(v ?? "").toLowerCase().includes(q);
+                        return (
+                          has(mapping.externalItemId) ||
+                          has(mapping.internalItemId || mapping.sku) ||
+                          has(mapping.description) ||
+                          has(
+                            sources.find((s) => s.id === mapping.sourceId)
+                              ?.name ||
+                              mapping.sourceId ||
+                              mapping.source,
+                          )
+                        );
+                      })
                       .map((mapping, index) => (
                         <tr
                           key={index}

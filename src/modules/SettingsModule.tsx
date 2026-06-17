@@ -140,100 +140,166 @@ export function SettingsModule() {
 
       <div className="col-span-12 lg:col-span-9 flex flex-col gap-6">
         {activeSection === "production-types" && (
-        <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-          <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-              Production Types
-            </h3>
-            <button
-              onClick={() =>
-                setEditingType({ id: "", name: "", defaultBleedInches: 0.125 })
-              }
-              className="text-primary hover:text-primary-hover flex items-center text-sm font-medium transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px] mr-1">
-                add
-              </span>
-              Add New
-            </button>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {productionTypes.map((type) => {
-              const inUse = checkInUse(type.id);
-              return (
-                <div
-                  key={type.id}
-                  className="p-6 hover:bg-gray-50 transition-colors"
-                >
-                  <h4 className="text-base font-semibold flex items-center gap-2">
-                    <button
-                      onClick={() => setEditingType(type)}
-                      className="text-[#cc0000] hover:underline font-semibold text-left"
-                    >
-                      {type.name}
-                    </button>
-                    {inUse && (
-                      <span
-                        className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-gray-100 text-gray-500"
-                        title="In Use"
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">
+                Production Types
+              </h2>
+              <button
+                onClick={() =>
+                  setEditingType({ id: "", name: "", defaultBleedInches: 0.125 })
+                }
+                className="text-primary hover:text-primary-hover flex items-center text-sm font-medium transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px] mr-1">
+                  add
+                </span>
+                Add New
+              </button>
+            </div>
+            <div className="overflow-x-auto border border-gray-200 rounded-lg">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/80 border-b border-gray-200">
+                    <th className="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      Name
+                    </th>
+                    <th className="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      Default Bleed
+                    </th>
+                    <th className="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {productionTypes.map((type, index) => {
+                    const inUse = checkInUse(type.id);
+                    return (
+                      <tr
+                        key={index}
+                        className="hover:bg-gray-50/50 transition-colors"
                       >
-                        Active
-                      </span>
-                    )}
-                  </h4>
-                  <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 font-mono">
-                    <span className="material-symbols-outlined text-[14px]">
-                      crop
-                    </span>
-                    Default Bleed: {type.defaultBleedInches}"
-                  </p>
-                </div>
-              );
-            })}
+                        <td className="px-5 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                          <button
+                            onClick={() => setEditingType(type)}
+                            className="text-[#cc0000] hover:underline font-semibold"
+                          >
+                            {type.name}
+                          </button>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap font-mono">
+                          {type.defaultBleedInches}"
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-600">
+                          {inUse ? (
+                            <span className="inline-flex px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-medium border border-gray-200">
+                              In use
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {productionTypes.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-5 py-8 text-center text-gray-500"
+                      >
+                        No production types yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
         )}
         {activeSection === "sources" && (
-        <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-          <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-              Sources
-            </h3>
-            <button
-              onClick={() =>
-                setEditingSource({ id: "", name: "", description: "", contactName: "", contactEmail: "" })
-              }
-              className="text-primary hover:text-primary-hover flex items-center text-sm font-medium transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px] mr-1">
-                add
-              </span>
-              Add New
-            </button>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {sources.map((source) => {
-              return (
-                <div
-                  key={source.id}
-                  className="p-6 hover:bg-gray-50 transition-colors"
-                >
-                  <h4 className="text-base font-semibold">
-                    <button
-                      onClick={() => setEditingSource(source)}
-                      className="text-[#cc0000] hover:underline font-semibold text-left"
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Sources</h2>
+              <button
+                onClick={() =>
+                  setEditingSource({ id: "", name: "", description: "", contactName: "", contactEmail: "" })
+                }
+                className="text-primary hover:text-primary-hover flex items-center text-sm font-medium transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px] mr-1">
+                  add
+                </span>
+                Add New
+              </button>
+            </div>
+            <div className="overflow-x-auto border border-gray-200 rounded-lg">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/80 border-b border-gray-200">
+                    <th className="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      Name
+                    </th>
+                    <th className="px-5 py-3 text-sm font-semibold text-gray-900">
+                      Description
+                    </th>
+                    <th className="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                      Contact
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {sources.map((source, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50/50 transition-colors"
                     >
-                      {source.name}
-                    </button>
-                  </h4>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {source.description || "No description"}
-                  </p>
-                </div>
-              );
-            })}
+                      <td className="px-5 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                        <button
+                          onClick={() => setEditingSource(source)}
+                          className="text-[#cc0000] hover:underline font-semibold"
+                        >
+                          {source.name}
+                        </button>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-gray-600 max-w-md">
+                        {source.description || (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap">
+                        {source.contactName || source.contactEmail ? (
+                          <div className="flex flex-col">
+                            {source.contactName && (
+                              <span>{source.contactName}</span>
+                            )}
+                            {source.contactEmail && (
+                              <span className="text-xs text-gray-400">
+                                {source.contactEmail}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {sources.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-5 py-8 text-center text-gray-500"
+                      >
+                        No sources yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
         )}
       </div>
 

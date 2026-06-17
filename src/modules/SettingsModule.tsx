@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { ProductionTypesContext } from "../context/ProductionTypesContext";
 import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INITIAL_IMPRESSIONS, INITIAL_MEDIA_CATALOG, INITIAL_PRINT_SPECS } from "../data/catalog";
 import { INITIAL_SOURCES } from "../data/mockData";
-import { useFirestoreSync } from "../hooks/useFirestoreSync";
+import { usePersistentState } from "../hooks/usePersistentState";
 import { ProductionTypeConfig } from "../types";
 import { StandardDrawer } from "../ui/StandardDrawer";
 import { StandardModal } from "../ui/StandardModal";
@@ -11,33 +11,33 @@ export function SettingsModule() {
   const [productionTypes, setProductionTypes] = React.useContext(
     ProductionTypesContext,
   );
-  const [mediaCatalog] = useFirestoreSync(
+  const [mediaCatalog] = usePersistentState(
     "appData",
     "media",
     INITIAL_MEDIA_CATALOG,
   );
-  const [printSpecs] = useFirestoreSync(
+  const [printSpecs] = usePersistentState(
     "appData",
     "print_specs",
     INITIAL_PRINT_SPECS,
   );
-  const [finishedSizes] = useFirestoreSync(
+  const [finishedSizes] = usePersistentState(
     "appData",
     "finished_sizes",
     INITIAL_FINISHED_SIZES,
   );
-  const [finishingOptions] = useFirestoreSync(
+  const [finishingOptions] = usePersistentState(
     "appData",
     "finishing_options",
     INITIAL_FINISHING_OPTIONS,
   );
-  const [colors] = useFirestoreSync("appData", "colors", INITIAL_COLORS);
-  const [impressions] = useFirestoreSync(
+  const [colors] = usePersistentState("appData", "colors", INITIAL_COLORS);
+  const [impressions] = usePersistentState(
     "appData",
     "impressions",
     INITIAL_IMPRESSIONS,
   );
-  const [sources, setSources] = useFirestoreSync<any[]>(
+  const [sources, setSources] = usePersistentState<any[]>(
     "appData",
     "sources",
     INITIAL_SOURCES,

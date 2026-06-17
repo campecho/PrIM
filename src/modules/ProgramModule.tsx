@@ -3,7 +3,7 @@ import { FileImportCard } from "../components/FileImportCard";
 import { CustomerDetailsDrawer } from "../components/drawers/CustomerDetailsDrawer";
 import { CustomerFilesDrawer } from "../components/drawers/CustomerFilesDrawer";
 import { MOCK_CUSTOMERS } from "../data/mockData";
-import { useFirestoreSync } from "../hooks/useFirestoreSync";
+import { usePersistentState } from "../hooks/usePersistentState";
 import { CustomerNote, FileAsset, PrintCustomer } from "../types";
 import { SearchBar } from "../ui/SearchBar";
 
@@ -20,7 +20,7 @@ export function ProgramModule({
   const [selectedCustomer, setSelectedCustomer] =
     useState<PrintCustomer | null>(null);
   const [newNote, setNewNote] = useState("");
-  const [customers, setCustomers] = useFirestoreSync(
+  const [customers, setCustomers] = usePersistentState(
     "appData",
     "customers",
     MOCK_CUSTOMERS,

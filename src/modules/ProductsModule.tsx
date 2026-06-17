@@ -5,35 +5,35 @@ import { ProductionTypesContext } from "../context/ProductionTypesContext";
 import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INITIAL_IMPRESSIONS, INITIAL_MEDIA_CATALOG, INITIAL_PRINT_SPECS } from "../data/catalog";
 import { INITIAL_SOURCES } from "../data/mockData";
 import { PRODUCT_OPTIONS } from "../data/options";
-import { useFirestoreSync } from "../hooks/useFirestoreSync";
+import { usePersistentState } from "../hooks/usePersistentState";
 import { SearchBar } from "../ui/SearchBar";
 import { TableActionMenu } from "../ui/TableActionMenu";
 
 export function ProductsModule() {
   const [activeTab, setActiveTab] = useState(PRODUCT_OPTIONS[0]);
-  const [printSpecs, setPrintSpecs] = useFirestoreSync(
+  const [printSpecs, setPrintSpecs] = usePersistentState(
     "appData",
     "print_specs",
     INITIAL_PRINT_SPECS,
   );
   const [productionTypes] = React.useContext(ProductionTypesContext);
-  const [finishedSizes] = useFirestoreSync(
+  const [finishedSizes] = usePersistentState(
     "appData",
     "finished_sizes",
     INITIAL_FINISHED_SIZES,
   );
-  const [mediaCatalog] = useFirestoreSync(
+  const [mediaCatalog] = usePersistentState(
     "appData",
     "media",
     INITIAL_MEDIA_CATALOG,
   );
-  const [colors] = useFirestoreSync("appData", "colors", INITIAL_COLORS);
-  const [impressions] = useFirestoreSync(
+  const [colors] = usePersistentState("appData", "colors", INITIAL_COLORS);
+  const [impressions] = usePersistentState(
     "appData",
     "impressions",
     INITIAL_IMPRESSIONS,
   );
-  const [finishingOptions] = useFirestoreSync(
+  const [finishingOptions] = usePersistentState(
     "appData",
     "finishing_options",
     INITIAL_FINISHING_OPTIONS,
@@ -41,7 +41,7 @@ export function ProductsModule() {
   const [selectedPrintSpec, setSelectedPrintSpec] = useState<any>(null);
   const [printSpecsSearchTerm, setPrintSpecsSearchTerm] = useState("");
 
-  const [mappings, setMappings] = useFirestoreSync<any[]>(
+  const [mappings, setMappings] = usePersistentState<any[]>(
     "appData",
     "mappings",
     [
@@ -59,13 +59,13 @@ export function ProductsModule() {
   const [mappingsSearchTerm, setMappingsSearchTerm] = useState("");
   const [selectedMapping, setSelectedMapping] = useState<any>(null);
 
-  const [sources] = useFirestoreSync<any[]>(
+  const [sources] = usePersistentState<any[]>(
     "appData",
     "sources",
     INITIAL_SOURCES
   );
 
-  const [savedProducts, setSavedProducts] = useFirestoreSync<any[]>(
+  const [savedProducts, setSavedProducts] = usePersistentState<any[]>(
     "appData",
     "products",
     [],

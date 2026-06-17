@@ -2,7 +2,8 @@
 
 An operational portal for print service providers and their clients to manage
 print workflows, assets, specifications, and orders. Built with React 19, Vite,
-Tailwind CSS v4, and Firebase (Firestore) for live data sync.
+and Tailwind CSS v4. State is persisted locally in the browser (localStorage);
+there is no backend.
 
 > Imported from a Google AI Studio prototype and refactored into a modular,
 > reusable component architecture.
@@ -14,7 +15,7 @@ Tailwind CSS v4, and Firebase (Firestore) for live data sync.
 - **Files** – asset library with status workflows (Pre-flight, Review, Approved, Rejected), filtering, and an import queue
 - **Products & Specs** – print specs plus a component resources directory (media, finished sizes, finishing options, colors, impressions)
 - **PrintBridge / Orders** – order queue with status flagging and tracking
-- **Settings** – global config and Firestore-backed mapping
+- **Settings** – global config, production types, and sources
 
 ## Getting started
 
@@ -33,8 +34,8 @@ npm run preview  # preview the production build
 npm run lint     # tsc --noEmit type check
 ```
 
-Firebase configuration lives in `firebase-applet-config.json` and is consumed
-by `src/firebase.ts`. Firestore security rules are in `firestore.rules`.
+State persists in the browser via `localStorage` (see
+`src/hooks/usePersistentState.ts`); there is no server, database, or auth.
 
 ## Project structure
 
@@ -56,7 +57,7 @@ src/
   modules/                One file per top-level module
   components/             Shared components (FileImportCard, FakeLoginOverlay)
   components/drawers/     One file per detail/edit drawer
-  hooks/                  useFirestoreSync
+  hooks/                  usePersistentState (localStorage)
   context/                ProductionTypesContext
   lib/                    format helpers, XLSX/PDF portability
   data/                   mock data, print-spec catalog, option lists, media/sizes
@@ -74,5 +75,5 @@ Tailwind utility strings for these elements.
 ### Build / performance
 
 Each module is lazy-loaded (`React.lazy`), and heavy third-party libraries
-(firebase, pdf-lib, xlsx, react-datepicker, motion) are split into their own
+(pdf-lib, xlsx, react-datepicker, motion) are split into their own
 vendor chunks via `manualChunks`, keeping the initial bundle small.

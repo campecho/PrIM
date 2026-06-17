@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useFirestoreSync } from "../../hooks/useFirestoreSync";
+import { usePersistentState } from "../../hooks/usePersistentState";
 import { PrintCustomer } from "../../types";
 import { StandardDrawer } from "../../ui/StandardDrawer";
 
@@ -40,7 +40,7 @@ export function CustomerDetailsDrawer({
     "details" | "notes" | "specs"
   >("details");
 
-  const [printSpecs] = useFirestoreSync<any[]>("appData", "print_specs", []);
+  const [printSpecs] = usePersistentState<any[]>("appData", "print_specs", []);
 
   React.useEffect(() => {
     if (customer) setActiveTab(initialTab);

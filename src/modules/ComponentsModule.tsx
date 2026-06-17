@@ -9,7 +9,7 @@ import { MediaDetailDrawer } from "../components/drawers/MediaDetailDrawer";
 import { ProductionTypesContext } from "../context/ProductionTypesContext";
 import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INITIAL_IMPRESSIONS, INITIAL_MEDIA_CATALOG } from "../data/catalog";
 import { COMPONENT_OPTIONS } from "../data/options";
-import { useFirestoreSync } from "../hooks/useFirestoreSync";
+import { usePersistentState } from "../hooks/usePersistentState";
 import { FinishingOption, MediaCatalogEntry } from "../types";
 import { StandardModal } from "../ui/StandardModal";
 import { TableActionMenu } from "../ui/TableActionMenu";
@@ -17,12 +17,12 @@ import { TableActionMenu } from "../ui/TableActionMenu";
 export function ComponentsModule() {
   const [activeTab, setActiveTab] = useState(COMPONENT_OPTIONS[0]);
   const [productionTypes] = React.useContext(ProductionTypesContext);
-  const [finishedSizes, setFinishedSizes] = useFirestoreSync(
+  const [finishedSizes, setFinishedSizes] = usePersistentState(
     "appData",
     "finished_sizes",
     INITIAL_FINISHED_SIZES,
   );
-  const [finishingOptions, setFinishingOptions] = useFirestoreSync(
+  const [finishingOptions, setFinishingOptions] = usePersistentState(
     "appData",
     "finishing_options",
     INITIAL_FINISHING_OPTIONS,
@@ -30,7 +30,7 @@ export function ComponentsModule() {
   const [selectedFinishingOption, setSelectedFinishingOption] =
     useState<FinishingOption | null>(null);
   const [selectedSize, setSelectedSize] = useState<any>(null);
-  const [mediaCatalog, setMediaCatalog] = useFirestoreSync(
+  const [mediaCatalog, setMediaCatalog] = usePersistentState(
     "appData",
     "media",
     INITIAL_MEDIA_CATALOG,
@@ -38,12 +38,12 @@ export function ComponentsModule() {
   const [selectedMedia, setSelectedMedia] = useState<MediaCatalogEntry | null>(
     null,
   );
-  const [colors, setColors] = useFirestoreSync(
+  const [colors, setColors] = usePersistentState(
     "appData",
     "colors",
     INITIAL_COLORS,
   );
-  const [impressions, setImpressions] = useFirestoreSync(
+  const [impressions, setImpressions] = usePersistentState(
     "appData",
     "impressions",
     INITIAL_IMPRESSIONS,

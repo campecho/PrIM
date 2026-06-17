@@ -24,7 +24,6 @@ export default defineConfig(({mode}) => {
           // Split large third-party dependencies into their own chunks so
           // they cache independently and the app's own code stays small.
           manualChunks: {
-            'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
             'vendor-motion': ['motion'],
             'vendor-pdf': ['pdf-lib', 'exifr'],
             'vendor-xlsx': ['xlsx'],

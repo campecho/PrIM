@@ -42,7 +42,7 @@ This application is a comprehensive operational portal designed for print servic
 
 ### 6. Settings & Administration
 - **Global Config:** Define core variables for the platform natively like bleed inches per production type.
-- **Database Synchronization:** Underlying support for Firestore to ensure seamless live updates securely.
+- **Local Persistence:** Settings and catalog data are saved in the browser (localStorage) so changes persist across reloads with no backend.
 
 ### 7. User Role Simulation
 - **Context Switching:** Simulated authentication allowing UI preview under distinct internal user personas.

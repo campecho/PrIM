@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { FakeLoginOverlay } from "./components/FakeLoginOverlay";
 import { INITIAL_PRODUCTION_TYPES, ProductionTypesContext } from "./context/ProductionTypesContext";
 import { MOCK_FILES } from "./data/mockData";
-import { useFirestoreSync } from "./hooks/useFirestoreSync";
+import { usePersistentState } from "./hooks/usePersistentState";
 import { bottomModules, topModules } from "./navigation";
 import { FileAsset, Module } from "./types";
 import { Button, Icon, NavButton, SegmentedControl } from "./ui";
@@ -33,7 +33,7 @@ export default function App() {
     setSimulatedUser(user);
   };
 
-  const [globalFiles, setGlobalFiles] = useFirestoreSync(
+  const [globalFiles, setGlobalFiles] = usePersistentState(
     "appData",
     "files",
     MOCK_FILES,
@@ -41,7 +41,7 @@ export default function App() {
   const [globalSelectedFile, setGlobalSelectedFile] =
     useState<FileAsset | null>(null);
 
-  const [productionTypes, setProductionTypes] = useFirestoreSync(
+  const [productionTypes, setProductionTypes] = usePersistentState(
     "appData",
     "production_types",
     INITIAL_PRODUCTION_TYPES,

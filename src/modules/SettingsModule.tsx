@@ -4,6 +4,7 @@ import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INIT
 import { INITIAL_SOURCES } from "../data/mockData";
 import { usePersistentState } from "../hooks/usePersistentState";
 import { ProductionTypeConfig } from "../types";
+import { Button } from "../ui/Button";
 import { StandardDrawer } from "../ui/StandardDrawer";
 import { StandardModal } from "../ui/StandardModal";
 
@@ -103,6 +104,7 @@ export function SettingsModule() {
     }
     setProductionTypes(productionTypes.filter((t) => t.id !== id));
     setIsDeletingId(null);
+    setEditingType(null);
   };
 
   return (
@@ -161,49 +163,30 @@ export function SettingsModule() {
               return (
                 <div
                   key={type.id}
-                  className="p-6 hover:bg-gray-50 transition-colors group flex items-start justify-between"
+                  className="p-6 hover:bg-gray-50 transition-colors"
                 >
-                  <div>
-                    <h4 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                      {type.name}
-                      {inUse && (
-                        <span
-                          className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-gray-100 text-gray-500"
-                          title="In Use"
-                        >
-                          Active
-                        </span>
-                      )}
-                    </h4>
-                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 font-mono">
-                      <span className="material-symbols-outlined text-[14px]">
-                        crop
-                      </span>
-                      Default Bleed: {type.defaultBleedInches}"
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <h4 className="text-base font-semibold flex items-center gap-2">
                     <button
                       onClick={() => setEditingType(type)}
-                      className="text-gray-400 hover:text-gray-700 transition-colors p-1"
-                      title="Edit"
+                      className="text-[#cc0000] hover:underline font-semibold text-left"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        edit
-                      </span>
+                      {type.name}
                     </button>
-                    {!inUse && (
-                      <button
-                        onClick={() => setIsDeletingId(type.id)}
-                        className="text-red-300 hover:text-[#cc0000] transition-colors p-1"
-                        title="Delete"
+                    {inUse && (
+                      <span
+                        className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-gray-100 text-gray-500"
+                        title="In Use"
                       >
-                        <span className="material-symbols-outlined text-[18px]">
-                          delete
-                        </span>
-                      </button>
+                        Active
+                      </span>
                     )}
-                  </div>
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-1 flex items-center gap-1.5 font-mono">
+                    <span className="material-symbols-outlined text-[14px]">
+                      crop
+                    </span>
+                    Default Bleed: {type.defaultBleedInches}"
+                  </p>
                 </div>
               );
             })}
@@ -233,36 +216,19 @@ export function SettingsModule() {
               return (
                 <div
                   key={source.id}
-                  className="p-6 hover:bg-gray-50 transition-colors group flex items-start justify-between"
+                  className="p-6 hover:bg-gray-50 transition-colors"
                 >
-                  <div>
-                    <h4 className="text-base font-semibold text-gray-900">
-                      {source.name}
-                    </h4>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {source.description || "No description"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <h4 className="text-base font-semibold">
                     <button
                       onClick={() => setEditingSource(source)}
-                      className="text-gray-400 hover:text-gray-700 transition-colors p-1"
-                      title="Edit"
+                      className="text-[#cc0000] hover:underline font-semibold text-left"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        edit
-                      </span>
+                      {source.name}
                     </button>
-                    <button
-                      onClick={() => setIsDeletingSourceId(source.id)}
-                      className="text-red-300 hover:text-[#cc0000] transition-colors p-1"
-                      title="Delete"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        delete
-                      </span>
-                    </button>
-                  </div>
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {source.description || "No description"}
+                  </p>
                 </div>
               );
             })}
@@ -271,28 +237,46 @@ export function SettingsModule() {
         )}
       </div>
 
-      <StandardModal
+      <StandardDrawer
         isOpen={!!editingType}
         onClose={() => setEditingType(null)}
         title={editingType?.id ? "Edit Production Type" : "New Production Type"}
-        icon={<span className="material-symbols-outlined">settings</span>}
-        primaryAction={{
-          label: "Save",
-          onClick: () => {
-            if (editingType) handleSaveType(editingType);
-          },
-          disabled:
-            !editingType?.name?.trim() || editingType.defaultBleedInches < 0,
-        }}
-        secondaryAction={{
-          label: "Cancel",
-          onClick: () => setEditingType(null),
-        }}
+        footer={
+          <div className="flex items-center justify-between w-full">
+            {editingType?.id && !checkInUse(editingType.id) ? (
+              <Button
+                variant="ghost"
+                leadingIcon="delete"
+                onClick={() => setIsDeletingId(editingType.id)}
+                className="!text-primary hover:!bg-red-50"
+              >
+                Delete
+              </Button>
+            ) : (
+              <span />
+            )}
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" onClick={() => setEditingType(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => editingType && handleSaveType(editingType)}
+                disabled={
+                  !editingType?.name?.trim() ||
+                  (editingType?.defaultBleedInches ?? 0) < 0
+                }
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        }
       >
         {editingType && (
-          <div className="space-y-4 pt-2">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 w-full">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Name <span className="text-[#cc0000]">*</span>
               </label>
               <input
@@ -301,12 +285,12 @@ export function SettingsModule() {
                 onChange={(e) =>
                   setEditingType({ ...editingType, name: e.target.value })
                 }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-primary outline-none"
+                className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm"
                 placeholder="e.g. Cut Sheet"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
                 Default Bleed (Inches) <span className="text-[#cc0000]">*</span>
               </label>
               <input
@@ -320,12 +304,12 @@ export function SettingsModule() {
                     defaultBleedInches: parseFloat(e.target.value) || 0,
                   })
                 }
-                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-primary outline-none"
+                className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm"
               />
             </div>
           </div>
         )}
-      </StandardModal>
+      </StandardDrawer>
 
       <StandardModal
         isOpen={!!isDeletingId}
@@ -353,22 +337,46 @@ export function SettingsModule() {
       <StandardDrawer
         isOpen={!!editingSource}
         onClose={() => setEditingSource(null)}
-        title={editingSource?.id ? "Edit Source: " + editingSource.name : "New Source"}
-        onSave={() => {
-          if (editingSource) {
-            const type = editingSource;
-            if (!type.id) {
-              type.id = crypto.randomUUID();
-              setSources([...sources, type]);
-            } else {
-              setSources(
-                sources.map((t) => (t.id === type.id ? type : t)),
-              );
-            }
-            setEditingSource(null);
-          }
-        }}
-        saveDisabled={!editingSource?.name?.trim()}
+        title={editingSource?.id ? "Edit Source" : "New Source"}
+        footer={
+          <div className="flex items-center justify-between w-full">
+            {editingSource?.id ? (
+              <Button
+                variant="ghost"
+                leadingIcon="delete"
+                onClick={() => setIsDeletingSourceId(editingSource.id)}
+                className="!text-primary hover:!bg-red-50"
+              >
+                Delete
+              </Button>
+            ) : (
+              <span />
+            )}
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" onClick={() => setEditingSource(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                disabled={!editingSource?.name?.trim()}
+                onClick={() => {
+                  if (editingSource) {
+                    const type = editingSource;
+                    if (!type.id) {
+                      type.id = crypto.randomUUID();
+                      setSources([...sources, type]);
+                    } else {
+                      setSources(sources.map((t) => (t.id === type.id ? type : t)));
+                    }
+                    setEditingSource(null);
+                  }
+                }}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        }
       >
         {editingSource && (
           <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 w-full">
@@ -447,6 +455,7 @@ export function SettingsModule() {
             if (isDeletingSourceId) {
               setSources(sources.filter((t) => t.id !== isDeletingSourceId));
               setIsDeletingSourceId(null);
+              setEditingSource(null);
             }
           },
         }}

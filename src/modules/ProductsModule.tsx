@@ -3,6 +3,7 @@ import { MappingDetailDrawer } from "../components/drawers/MappingDetailDrawer";
 import { PrintSpecDetailDrawer } from "../components/drawers/PrintSpecDetailDrawer";
 import { ProductionTypesContext } from "../context/ProductionTypesContext";
 import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INITIAL_IMPRESSIONS, INITIAL_MEDIA_CATALOG, INITIAL_PRINT_SPECS } from "../data/catalog";
+import { INITIAL_SOURCES } from "../data/mockData";
 import { PRODUCT_OPTIONS } from "../data/options";
 import { useFirestoreSync } from "../hooks/useFirestoreSync";
 import { SearchBar } from "../ui/SearchBar";
@@ -61,7 +62,7 @@ export function ProductsModule() {
   const [sources] = useFirestoreSync<any[]>(
     "appData",
     "sources",
-    []
+    INITIAL_SOURCES
   );
 
   const [savedProducts, setSavedProducts] = useFirestoreSync<any[]>(

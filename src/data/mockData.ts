@@ -315,3 +315,16 @@ export const ADDITIONAL_ORDERS = Array.from({ length: 29 }).map((_, i) => {
 });
 
 MOCK_ORDERS.push(...ADDITIONAL_ORDERS);
+
+// Default Source catalog (Settings > Sources). Shared as the Firestore
+// fallback for "appData/sources" so the Mapping Source dropdown and the
+// Settings table seed from the same list.
+export const INITIAL_SOURCES = [
+  {
+    id: "source-hca-censhare",
+    name: "HCA/Censhare",
+    description: "HCA Marketing System",
+    contactName: "John Doe",
+    contactEmail: "john@example.com",
+  },
+];

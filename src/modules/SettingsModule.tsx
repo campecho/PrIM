@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { ProductionTypesContext } from "../context/ProductionTypesContext";
 import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INITIAL_IMPRESSIONS, INITIAL_MEDIA_CATALOG, INITIAL_PRINT_SPECS } from "../data/catalog";
+import { INITIAL_SOURCES } from "../data/mockData";
 import { useFirestoreSync } from "../hooks/useFirestoreSync";
 import { ProductionTypeConfig } from "../types";
 import { StandardDrawer } from "../ui/StandardDrawer";
@@ -39,15 +40,7 @@ export function SettingsModule() {
   const [sources, setSources] = useFirestoreSync<any[]>(
     "appData",
     "sources",
-    [
-      {
-        id: crypto.randomUUID(),
-        name: "HCA/Censhare",
-        description: "HCA Marketing System",
-        contactName: "John Doe",
-        contactEmail: "john@example.com"
-      }
-    ],
+    INITIAL_SOURCES,
   );
 
   const [editingType, setEditingType] = useState<ProductionTypeConfig | null>(

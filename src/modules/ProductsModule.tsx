@@ -453,10 +453,10 @@ export function ProductsModule() {
                           key={index}
                           className="hover:bg-gray-50/50 transition-colors"
                         >
-                          <td className="px-5 py-4 text-sm break-words max-w-[200px]">
+                          <td className="px-5 py-4 text-sm align-top">
                             <button
                               onClick={() => setSelectedMapping(mapping)}
-                              className="text-[#cc0000] hover:underline font-semibold text-left"
+                              className="text-[#cc0000] hover:underline font-semibold text-left block max-w-[200px] break-words"
                             >
                               {mapping.externalItemId}
                             </button>

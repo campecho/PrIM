@@ -25,7 +25,7 @@ export function MappingDetailDrawer({
     <StandardDrawer
       isOpen={!!selectedMapping}
       onClose={onClose}
-      title={selectedMapping?.externalItemId ? "Edit Mapping: " + selectedMapping.externalItemId : "New Mapping"}
+      title={selectedMapping?.externalItemId ? "Edit Mapping" : "New Mapping"}
       footer={
         <div className="flex items-center justify-between w-full">
           {onDelete ? (

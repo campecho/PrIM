@@ -9,6 +9,7 @@ import { PRODUCT_OPTIONS } from "../data/options";
 import { usePersistentState } from "../hooks/usePersistentState";
 import { exportMappingsToXLSX, parseImportedXLSX } from "../lib/portability";
 import { SearchBar } from "../ui/SearchBar";
+import { StandardModal } from "../ui/StandardModal";
 import { TableActionMenu } from "../ui/TableActionMenu";
 
 export function ProductsModule() {
@@ -60,6 +61,7 @@ export function ProductsModule() {
   );
   const [mappingsSearchTerm, setMappingsSearchTerm] = useState("");
   const [selectedMapping, setSelectedMapping] = useState<any>(null);
+  const [mappingToDelete, setMappingToDelete] = useState<any>(null);
   const [mappingImport, setMappingImport] = useState<any[] | null>(null);
 
   const [sources] = usePersistentState<any[]>(
@@ -631,17 +633,41 @@ export function ProductsModule() {
         }}
         onDelete={
           selectedMapping && mappings.some((m) => m.id === selectedMapping.id)
-            ? () => {
-                if (confirm("Are you sure you want to delete this mapping?")) {
-                  setMappings((prev) =>
-                    prev.filter((m) => m.id !== selectedMapping.id),
-                  );
-                  setSelectedMapping(null);
-                }
-              }
+            ? () => setMappingToDelete(selectedMapping)
             : undefined
         }
       />
+      <StandardModal
+        isOpen={!!mappingToDelete}
+        onClose={() => setMappingToDelete(null)}
+        title="Confirm Deletion"
+        danger={true}
+        icon={<span className="material-symbols-outlined">delete_forever</span>}
+        primaryAction={{
+          label: "Delete it",
+          onClick: () => {
+            if (mappingToDelete) {
+              setMappings((prev) =>
+                prev.filter((m) => m.id !== mappingToDelete.id),
+              );
+              setMappingToDelete(null);
+              setSelectedMapping(null);
+            }
+          },
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setMappingToDelete(null),
+        }}
+      >
+        <p className="text-gray-700 text-sm">
+          Are you sure you want to delete the mapping
+          {mappingToDelete?.externalItemId
+            ? ` "${mappingToDelete.externalItemId}"`
+            : ""}
+          ? This cannot be undone.
+        </p>
+      </StandardModal>
       {mappingImport && (
         <ImportReviewModal
           isOpen={true}

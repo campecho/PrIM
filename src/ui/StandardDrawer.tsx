@@ -1,5 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Button } from "./Button";
+import { IconButton } from "./IconButton";
 
 export function StandardDrawer({
   isOpen,
@@ -46,12 +48,12 @@ export function StandardDrawer({
               <h2 className="text-lg font-semibold flex items-center h-full m-0 justify-center">
                 {title}
               </h2>
-              <button
+              <IconButton
+                icon="close"
+                label="Close"
                 onClick={onClose}
-                className="absolute right-4 top-[calc(50%+4px)] -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
+                className="absolute right-4 top-[calc(50%+4px)] -translate-y-1/2"
+              />
             </div>
 
             <div className="flex-1 flex flex-col overflow-y-auto w-full">
@@ -96,19 +98,17 @@ export function StandardDrawer({
                 }}
                 className="items-center shrink-0"
               >
-                <button
-                  onClick={onClose}
-                  className="px-6 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-[20px] hover:bg-gray-50 transition-all shadow-sm"
-                >
+                <Button variant="secondary" onClick={onClose}>
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="primary"
                   onClick={onSave}
                   disabled={hasChanges === false || saveDisabled === true}
-                  className="px-6 py-2 ml-3 bg-primary text-white text-sm font-semibold rounded-[20px] hover:bg-primary-dark transition-all disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm"
+                  className="ml-3"
                 >
                   {saveLabel}
-                </button>
+                </Button>
               </div>
             ) : null}
           </motion.div>

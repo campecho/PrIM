@@ -13,6 +13,7 @@ import { SettingsModule } from "./modules/SettingsModule";
 import { UserModule } from "./modules/UserModule";
 import { bottomModules, topModules } from "./navigation";
 import { FileAsset, Module } from "./types";
+import { Button, Icon, NavButton, SegmentedControl } from "./ui";
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>(topModules[0]);
@@ -71,7 +72,7 @@ export default function App() {
                 isSidebarExpanded ? "px-4" : "justify-center"
               }`}
             >
-              <span className="material-symbols-outlined text-3xl">menu</span>
+              <Icon name="menu" size="text-3xl" />
               {isSidebarExpanded && (
                 <span className="ml-3 font-bold text-xl whitespace-nowrap overflow-hidden">
                   PrIM
@@ -83,54 +84,28 @@ export default function App() {
           {/* Top Modules */}
           <nav className="flex-1 overflow-y-auto py-4 flex flex-col gap-1">
             {topModules.map((mod) => (
-              <button
+              <NavButton
                 key={mod.id}
+                icon={mod.icon}
+                label={mod.name}
+                active={activeModule.id === mod.id}
+                expanded={isSidebarExpanded}
                 onClick={() => setActiveModule(mod)}
-                className={`flex items-center px-4 py-3 w-full transition-colors ${
-                  activeModule.id === mod.id
-                    ? "bg-black/20 border-l-4 border-white"
-                    : "hover:bg-black/10 border-l-4 border-transparent"
-                }`}
-                title={isSidebarExpanded ? undefined : mod.name}
-              >
-                {typeof mod.icon === "string" ? (
-                  <span className="material-symbols-outlined">{mod.icon}</span>
-                ) : (
-                  <span className="flex items-center justify-center w-6 h-6">{mod.icon}</span>
-                )}
-                {isSidebarExpanded && (
-                  <span className="ml-4 font-medium whitespace-nowrap">
-                    {mod.name}
-                  </span>
-                )}
-              </button>
+              />
             ))}
           </nav>
 
           {/* Bottom Modules */}
           <div className="py-4 border-t border-black/10 flex flex-col gap-1 shrink-0 bg-black/5">
             {bottomModules.map((mod) => (
-              <button
+              <NavButton
                 key={mod.id}
+                icon={mod.icon}
+                label={mod.name}
+                active={activeModule.id === mod.id}
+                expanded={isSidebarExpanded}
                 onClick={() => setActiveModule(mod)}
-                className={`flex items-center px-4 py-3 w-full transition-colors ${
-                  activeModule.id === mod.id
-                    ? "bg-black/20 border-l-4 border-white"
-                    : "hover:bg-black/10 border-l-4 border-transparent"
-                }`}
-                title={isSidebarExpanded ? undefined : mod.name}
-              >
-                {typeof mod.icon === "string" ? (
-                  <span className="material-symbols-outlined">{mod.icon}</span>
-                ) : (
-                  <span className="flex items-center justify-center w-6 h-6">{mod.icon}</span>
-                )}
-                {isSidebarExpanded && (
-                  <span className="ml-4 font-medium whitespace-nowrap">
-                    {mod.name}
-                  </span>
-                )}
-              </button>
+              />
             ))}
           </div>
         </aside>
@@ -144,31 +119,17 @@ export default function App() {
             </h1>
             {activeModule.id === "orders" && (
               <div className="flex items-center gap-3">
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors">
+                <Button variant="secondary" pill={false} size="sm">
                   Mapping
-                </button>
-                <div className="flex bg-gray-100 p-1 rounded-md border border-gray-200">
-                  <button
-                    onClick={() => setOrdersState("orders")}
-                    className={`px-4 py-1.5 text-sm font-medium rounded ${
-                      ordersState === "orders"
-                        ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    Orders
-                  </button>
-                  <button
-                    onClick={() => setOrdersState("empty")}
-                    className={`px-4 py-1.5 text-sm font-medium rounded ${
-                      ordersState === "empty"
-                        ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    Empty
-                  </button>
-                </div>
+                </Button>
+                <SegmentedControl
+                  value={ordersState}
+                  onChange={(v) => setOrdersState(v)}
+                  options={[
+                    { value: "orders", label: "Orders" },
+                    { value: "empty", label: "Empty" },
+                  ]}
+                />
               </div>
             )}
           </header>
@@ -224,9 +185,7 @@ export default function App() {
                 <div className="col-span-12 flex items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 bg-gray-50">
                   <div className="text-center">
                     {typeof activeModule.icon === "string" ? (
-                      <span className="material-symbols-outlined text-4xl mb-2 opacity-50">
-                        {activeModule.icon}
-                      </span>
+                      <Icon name={activeModule.icon} size="text-4xl" className="mb-2 opacity-50" />
                     ) : (
                       <span className="inline-flex text-4xl mb-2 opacity-50 items-center justify-center">
                         {activeModule.icon}

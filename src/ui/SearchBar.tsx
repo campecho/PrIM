@@ -1,4 +1,4 @@
-
+import { Icon } from "./Icon";
 
 export function SearchBar({
   value,
@@ -13,9 +13,11 @@ export function SearchBar({
 }) {
   return (
     <div className={`relative ${className}`}>
-      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">
-        search
-      </span>
+      <Icon
+        name="search"
+        size="text-[20px]"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      />
       <input
         type="text"
         placeholder={placeholder}

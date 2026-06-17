@@ -1,5 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Button } from "./Button";
+import { IconButton } from "./IconButton";
 
 export function StandardModal({
   isOpen,
@@ -77,14 +79,13 @@ export function StandardModal({
                 )}
               </div>
               {fullScreen && (
-                <button
+                <IconButton
+                  icon="close"
+                  label="Close"
+                  iconSize="text-2xl"
                   onClick={onClose}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center text-gray-600 focus:outline-none"
-                >
-                  <span className="material-symbols-outlined text-2xl">
-                    close
-                  </span>
-                </button>
+                  className="absolute right-4 top-1/2 -translate-y-1/2"
+                />
               )}
             </div>
 
@@ -107,22 +108,24 @@ export function StandardModal({
             {(primaryAction || secondaryAction) && (
               <div className="p-4 bg-gray-50 flex items-center justify-end gap-3 shrink-0 border-t border-gray-200">
                 {secondaryAction && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={secondaryAction.onClick}
                     disabled={secondaryAction.disabled}
-                    className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-[20px] hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
                   >
                     {secondaryAction.label}
-                  </button>
+                  </Button>
                 )}
                 {primaryAction && (
-                  <button
+                  <Button
+                    variant={danger ? "danger" : "primary"}
+                    size="sm"
                     onClick={primaryAction.onClick}
                     disabled={primaryAction.disabled}
-                    className={`px-4 py-2 text-sm font-semibold text-white rounded-[20px] transition-colors shadow-sm disabled:opacity-50 ${danger ? "bg-[#cc0000] hover:bg-[#a30000]" : "bg-primary hover:bg-primary-dark"}`}
                   >
                     {primaryAction.label}
-                  </button>
+                  </Button>
                 )}
               </div>
             )}

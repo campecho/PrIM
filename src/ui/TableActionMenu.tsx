@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { Icon } from "./Icon";
+import { IconButton } from "./IconButton";
 
 export function TableActionMenu({
   actions,
@@ -25,12 +27,12 @@ export function TableActionMenu({
 
   return (
     <div className="relative" ref={menuRef}>
-      <button
+      <IconButton
+        icon="more_vert"
+        label="Actions"
+        iconSize="text-[20px]"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
-      >
-        <span className="material-symbols-outlined text-[20px]">more_vert</span>
-      </button>
+      />
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 py-1 flex flex-col">
@@ -49,9 +51,7 @@ export function TableActionMenu({
                     : "text-gray-700"
               }`}
             >
-              <span className="material-symbols-outlined text-[18px] opacity-70">
-                {action.icon}
-              </span>
+              <Icon name={action.icon} size="text-[18px]" className="opacity-70" />
               {action.label}
             </button>
           ))}

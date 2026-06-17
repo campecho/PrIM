@@ -39,6 +39,29 @@ export const exportMediaToXLSX = (mediaCatalog: any[]) => {
   writeFile(workbook, 'media_catalog_export.xlsx');
 };
 
+export const exportMappingsToXLSX = (mappings: any[], sources: any[] = []) => {
+  const sourceName = (id: string) =>
+    sources.find((s) => s.id === id)?.name || '';
+
+  const rows = mappings.map((m) => ({
+    'ID': m.id || '',
+    'External Item ID': m.externalItemId || '',
+    'Internal Item ID (SKU)': m.internalItemId || m.sku || '',
+    'QTY Modify Type': m.qtyModifyType || 'none',
+    'QTY Modifier': m.qtyModifier ?? '',
+    'Description': m.description || '',
+    'Spec Type': m.specType || '',
+    'Spec Value': m.specValue || '',
+    'Source ID': m.sourceId || '',
+    'Source': sourceName(m.sourceId) || m.source || '',
+  }));
+
+  const worksheet = utils.json_to_sheet(rows);
+  const workbook = utils.book_new();
+  utils.book_append_sheet(workbook, worksheet, 'Mappings');
+  writeFile(workbook, 'mappings_export.xlsx');
+};
+
 export const parseImportedXLSX = async (file: File): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

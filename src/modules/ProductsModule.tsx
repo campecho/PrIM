@@ -6,6 +6,7 @@ import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INIT
 import { INITIAL_SOURCES } from "../data/mockData";
 import { PRODUCT_OPTIONS } from "../data/options";
 import { usePersistentState } from "../hooks/usePersistentState";
+import { exportMappingsToXLSX, parseImportedXLSX } from "../lib/portability";
 import { SearchBar } from "../ui/SearchBar";
 import { TableActionMenu } from "../ui/TableActionMenu";
 
@@ -73,6 +74,48 @@ export function ProductsModule() {
   const [selectedSavedProduct, setSelectedSavedProduct] = useState<any>(null);
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const productFileInputRef = useRef<HTMLInputElement>(null);
+  const mappingFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportMappings = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const rows = await parseImportedXLSX(file);
+      const imported = rows.map((row: any) => ({
+        id: row.ID || crypto.randomUUID(),
+        externalItemId: row["External Item ID"] || "",
+        internalItemId:
+          row["Internal Item ID (SKU)"] ||
+          row["Internal Item ID"] ||
+          row.SKU ||
+          "",
+        qtyModifyType: row["QTY Modify Type"] || "none",
+        qtyModifier: row["QTY Modifier"] != null ? String(row["QTY Modifier"]) : "0",
+        description: row.Description || "",
+        specType: row["Spec Type"] || "None assigned",
+        specValue: row["Spec Value"] || "",
+        sourceId:
+          row["Source ID"] ||
+          sources.find((s) => s.name === row.Source)?.id ||
+          "",
+      }));
+      setMappings((prev) => {
+        const next = [...prev];
+        imported.forEach((m) => {
+          const idx = next.findIndex((x) => x.id === m.id);
+          if (idx >= 0) next[idx] = { ...next[idx], ...m };
+          else next.push(m);
+        });
+        return next;
+      });
+      alert(`Imported ${imported.length} mapping(s).`);
+    } catch {
+      alert("Failed to parse XLSX file");
+    }
+    e.target.value = "";
+  };
 
   const handleImportProductDef = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -121,6 +164,13 @@ export function ProductsModule() {
         className="hidden"
         ref={productFileInputRef}
         onChange={handleImportProductDef}
+      />
+      <input
+        type="file"
+        accept=".xlsx"
+        className="hidden"
+        ref={mappingFileInputRef}
+        onChange={handleImportMappings}
       />
       <div className="col-span-12 lg:col-span-3 flex flex-col gap-6 lg:self-start mb-6 md:mb-8 lg:mb-0 lg:h-full lg:overflow-y-auto lg:pr-2 lg:-mr-2 scrollbar-none pb-8">
         <div className="w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200 shrink-0">
@@ -201,8 +251,16 @@ export function ProductsModule() {
                 />
                 <TableActionMenu
                   actions={[
-                    { label: "Import", icon: "upload" },
-                    { label: "Export", icon: "download" },
+                    {
+                      label: "Import",
+                      icon: "upload",
+                      onClick: () => mappingFileInputRef.current?.click(),
+                    },
+                    {
+                      label: "Export",
+                      icon: "download",
+                      onClick: () => exportMappingsToXLSX(mappings, sources),
+                    },
                     {
                       label: "Add Mapping",
                       icon: "add",

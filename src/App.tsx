@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { FakeLoginOverlay } from "./components/FakeLoginOverlay";
 import { INITIAL_PRODUCTION_TYPES, ProductionTypesContext } from "./context/ProductionTypesContext";
 import { MOCK_FILES } from "./data/mockData";
 import { useFirestoreSync } from "./hooks/useFirestoreSync";
-import { ComponentsModule } from "./modules/ComponentsModule";
-import { FilesModule } from "./modules/FilesModule";
-import { OrdersModule } from "./modules/OrdersModule";
-import { ProductsModule } from "./modules/ProductsModule";
-import { ProgramModule } from "./modules/ProgramModule";
-import { ProjectsModule } from "./modules/ProjectsModule";
-import { SettingsModule } from "./modules/SettingsModule";
-import { UserModule } from "./modules/UserModule";
 import { bottomModules, topModules } from "./navigation";
 import { FileAsset, Module } from "./types";
 import { Button, Icon, NavButton, SegmentedControl } from "./ui";
+
+// Modules are code-split so each loads on demand, keeping the initial
+// bundle small and isolating heavy dependencies (pdf-lib, xlsx, exifr).
+const ProgramModule = lazy(() => import("./modules/ProgramModule").then((m) => ({ default: m.ProgramModule })));
+const ProjectsModule = lazy(() => import("./modules/ProjectsModule").then((m) => ({ default: m.ProjectsModule })));
+const FilesModule = lazy(() => import("./modules/FilesModule").then((m) => ({ default: m.FilesModule })));
+const ComponentsModule = lazy(() => import("./modules/ComponentsModule").then((m) => ({ default: m.ComponentsModule })));
+const ProductsModule = lazy(() => import("./modules/ProductsModule").then((m) => ({ default: m.ProductsModule })));
+const OrdersModule = lazy(() => import("./modules/OrdersModule").then((m) => ({ default: m.OrdersModule })));
+const SettingsModule = lazy(() => import("./modules/SettingsModule").then((m) => ({ default: m.SettingsModule })));
+const UserModule = lazy(() => import("./modules/UserModule").then((m) => ({ default: m.UserModule })));
 
 export default function App() {
   const [activeModule, setActiveModule] = useState<Module>(topModules[0]);
@@ -154,6 +157,13 @@ export default function App() {
                   : "content-start"
               }`}
             >
+              <Suspense
+                fallback={
+                  <div className="col-span-12 flex items-center justify-center h-64 text-gray-400">
+                    <Icon name="progress_activity" size="text-4xl" className="animate-spin" />
+                  </div>
+                }
+              >
               {activeModule.id === "program" ? (
                 <ProgramModule
                   onNavigateToFiles={navigateToFilesWithFilter}
@@ -197,6 +207,7 @@ export default function App() {
                   </div>
                 </div>
               )}
+              </Suspense>
             </div>
           </div>
         </main>

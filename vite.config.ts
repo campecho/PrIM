@@ -15,6 +15,24 @@ export default defineConfig(({mode}) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      // The pdf-lib / xlsx vendor chunks are large but lazy-loaded only when
+      // their module is opened, so they don't affect initial page load.
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          // Split large third-party dependencies into their own chunks so
+          // they cache independently and the app's own code stays small.
+          manualChunks: {
+            'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+            'vendor-motion': ['motion'],
+            'vendor-pdf': ['pdf-lib', 'exifr'],
+            'vendor-xlsx': ['xlsx'],
+            'vendor-datepicker': ['react-datepicker'],
+          },
+        },
+      },
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.

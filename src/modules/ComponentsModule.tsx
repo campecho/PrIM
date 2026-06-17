@@ -11,8 +11,54 @@ import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INIT
 import { COMPONENT_OPTIONS } from "../data/options";
 import { usePersistentState } from "../hooks/usePersistentState";
 import { FinishingOption, MediaCatalogEntry } from "../types";
-import { StandardModal } from "../ui/StandardModal";
 import { TableActionMenu } from "../ui/TableActionMenu";
+import { ImportReviewModal, ImportColumn } from "../components/ImportReviewModal";
+
+const toBool = (v: any): boolean => {
+  if (typeof v === "boolean") return v;
+  const s = String(v ?? "").toLowerCase().trim();
+  return s === "true" || s === "yes" || s === "1";
+};
+
+const prodTypeFromLabel = (v: any): string => {
+  const s = String(v ?? "").toLowerCase().trim();
+  if (s === "cut sheet" || s === "cutsheet") return "cutSheet";
+  if (s === "wf roll" || s === "wideformatroll") return "wideFormatRoll";
+  if (s === "wf rigid" || s === "wideformatrigid") return "wideFormatRigid";
+  return String(v ?? "");
+};
+
+const FINISHED_SIZE_COLUMNS: ImportColumn[] = [
+  { key: "name", label: "Name", type: "text", required: true },
+  { key: "key", label: "Key", type: "text", width: "w-24" },
+  { key: "widthIn", label: "Width (in)", type: "number", required: true, min: 0, width: "w-24" },
+  { key: "heightIn", label: "Height (in)", type: "number", required: true, min: 0, width: "w-24" },
+  { key: "cutSheet", label: "Cut Sheet", type: "boolean", width: "w-20" },
+  { key: "wfRoll", label: "WF Roll", type: "boolean", width: "w-20" },
+  { key: "wfRigid", label: "WF Rigid", type: "boolean", width: "w-20" },
+  { key: "description", label: "Description", type: "text" },
+];
+
+const MEDIA_COLUMNS: ImportColumn[] = [
+  { key: "displayName", label: "Display Name", type: "text", required: true },
+  { key: "internalName", label: "Internal Name", type: "text" },
+  { key: "key", label: "Key", type: "text", width: "w-24" },
+  { key: "lbs", label: "LBS", type: "text", width: "w-20" },
+  { key: "gsm", label: "GSM", type: "text", width: "w-20" },
+  { key: "pt", label: "PT", type: "text", width: "w-20" },
+  { key: "caliper", label: "Caliper", type: "text", width: "w-24" },
+  {
+    key: "productionType",
+    label: "Production Type",
+    type: "select",
+    required: true,
+    options: [
+      { value: "cutSheet", label: "Cut Sheet" },
+      { value: "wideFormatRoll", label: "WF Roll" },
+      { value: "wideFormatRigid", label: "WF Rigid" },
+    ],
+  },
+];
 
 export function ComponentsModule() {
   const [activeTab, setActiveTab] = useState(COMPONENT_OPTIONS[0]);
@@ -56,7 +102,9 @@ export function ComponentsModule() {
   ]);
   const [isColorKeysDrawerOpen, setIsColorKeysDrawerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [reviewImportData, setReviewImportData] = useState<any[] | null>(null);
+  const [importReview, setImportReview] = useState<
+    { kind: "finished-sizes" | "media"; rows: any[] } | null
+  >(null);
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -64,70 +112,75 @@ export function ComponentsModule() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     try {
-      const data = await parseImportedXLSX(file);
-      setReviewImportData(data);
-    } catch (err) {
+      const raw = await parseImportedXLSX(file);
+      if (raw.length === 0) {
+        alert("The selected file is empty.");
+        return;
+      }
+      if (activeTab.id === "finished-sizes") {
+        const rows = raw.map((row: any) => ({
+          id: row.ID || crypto.randomUUID(),
+          name: row.Name ?? "",
+          key: row.Key ?? "",
+          widthIn: row["Width (Inches)"] ?? "",
+          heightIn: row["Height (Inches)"] ?? "",
+          cutSheet: toBool(row["Cut Sheet"]),
+          wfRoll: toBool(row["WF Roll"]),
+          wfRigid: toBool(row["WF Rigid"]),
+          description: row.Description ?? "",
+        }));
+        setImportReview({ kind: "finished-sizes", rows });
+      } else if (activeTab.id === "media") {
+        const rows = raw.map((row: any) => ({
+          id: row.ID || crypto.randomUUID(),
+          displayName: row["Display Name"] ?? "",
+          internalName: row["Internal Name"] ?? "",
+          key: row.Key ?? "",
+          lbs: row.LBS ?? "",
+          gsm: row.GSM ?? "",
+          pt: row.PT ?? "",
+          caliper: row.Caliper ?? "",
+          productionType: prodTypeFromLabel(row["Production Type"]),
+        }));
+        setImportReview({ kind: "media", rows });
+      } else {
+        alert("Import is not available for this tab yet.");
+      }
+    } catch {
       alert("Failed to parse XLSX file");
     }
     e.target.value = "";
   };
 
-  const confirmImport = () => {
-    if (!reviewImportData) return;
-    if (activeTab.id === "finished-sizes") {
-      const parsed = reviewImportData.map((row) => ({
-        id: row.ID || crypto.randomUUID(),
-        name: row.Name,
-        key: row.Key,
-        widthIn: Number(row["Width (Inches)"]) || 0,
-        heightIn: Number(row["Height (Inches)"]) || 0,
-        widthPt: (Number(row["Width (Inches)"]) || 0) * 72,
-        heightPt: (Number(row["Height (Inches)"]) || 0) * 72,
-        description: row.Description || "",
-        productionTypes: [
-          String(row["Cut Sheet"]).toUpperCase() === "TRUE" ? "cutSheet" : null,
-          String(row["WF Roll"]).toUpperCase() === "TRUE"
-            ? "wideFormatRoll"
-            : null,
-          String(row["WF Rigid"]).toUpperCase() === "TRUE"
-            ? "wideFormatRigid"
-            : null,
-        ].filter(Boolean),
-      }));
+  const handleConfirmFinishedSizes = (
+    rows: any[],
+    mode: "merge" | "overwrite",
+  ) => {
+    const mapped = rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      key: r.key,
+      widthIn: Number(r.widthIn) || 0,
+      heightIn: Number(r.heightIn) || 0,
+      widthPt: (Number(r.widthIn) || 0) * 72,
+      heightPt: (Number(r.heightIn) || 0) * 72,
+      description: r.description || "",
+      productionTypes: [
+        r.cutSheet ? "cutSheet" : null,
+        r.wfRoll ? "wideFormatRoll" : null,
+        r.wfRigid ? "wideFormatRigid" : null,
+      ].filter(Boolean) as string[],
+    }));
+    if (mode === "overwrite") {
+      setFinishedSizes(mapped);
+    } else {
       setFinishedSizes((prev) => {
         const next = [...prev];
-        parsed.forEach((p) => {
-          const idx = next.findIndex((x) => x.id === p.id);
-          if (idx >= 0) next[idx] = { ...next[idx], ...p };
-          else next.push(p);
-        });
-        return next;
-      });
-    } else if (activeTab.id === "media") {
-      const parsed = reviewImportData.map((row) => ({
-        id: row.ID || crypto.randomUUID(),
-        displayName: row["Display Name"] || "",
-        internalName: row["Internal Name"] || "",
-        key: row.Key || "",
-        lbs: row.LBS || "",
-        gsm: row.GSM || "",
-        pt: row.PT || "",
-        caliper: row.Caliper || "",
-        productionType: (row["Production Type"] === "Cut Sheet"
-          ? "cutSheet"
-          : row["Production Type"] === "WF Roll"
-            ? "wideFormatRoll"
-            : "wideFormatRigid") as
-          | "cutSheet"
-          | "wideFormatRoll"
-          | "wideFormatRigid",
-        compatibleFinishedSizes: [],
-      }));
-      setMediaCatalog((prev) => {
-        const next = [...prev];
-        parsed.forEach((p) => {
+        mapped.forEach((p) => {
           const idx = next.findIndex((x) => x.id === p.id);
           if (idx >= 0) next[idx] = { ...next[idx], ...p };
           else next.push(p);
@@ -135,8 +188,39 @@ export function ComponentsModule() {
         return next;
       });
     }
-    setReviewImportData(null);
+    setImportReview(null);
   };
+
+  const handleConfirmMedia = (rows: any[], mode: "merge" | "overwrite") => {
+    const base = (r: any) => ({
+      id: r.id,
+      displayName: r.displayName,
+      internalName: r.internalName,
+      key: r.key,
+      lbs: r.lbs,
+      gsm: r.gsm,
+      pt: r.pt,
+      caliper: r.caliper,
+      productionType: r.productionType,
+    });
+    if (mode === "overwrite") {
+      setMediaCatalog(
+        rows.map((r) => ({ ...base(r), compatibleFinishedSizes: [] })) as any,
+      );
+    } else {
+      setMediaCatalog((prev) => {
+        const next = [...prev];
+        rows.forEach((r) => {
+          const idx = next.findIndex((x) => x.id === r.id);
+          if (idx >= 0) next[idx] = { ...next[idx], ...base(r) };
+          else next.push({ ...base(r), compatibleFinishedSizes: [] } as any);
+        });
+        return next;
+      });
+    }
+    setImportReview(null);
+  };
+
 
   return (
     <>
@@ -147,66 +231,27 @@ export function ComponentsModule() {
         onChange={handleFileChange}
         className="hidden"
       />
-      {reviewImportData && (
-        <StandardModal
+      {importReview?.kind === "finished-sizes" && (
+        <ImportReviewModal
           isOpen={true}
-          onClose={() => setReviewImportData(null)}
-          title={`Review Import: ${activeTab.title}`}
-          primaryAction={{ label: "Confirm Import", onClick: confirmImport }}
-          secondaryAction={{
-            label: "Cancel",
-            onClick: () => setReviewImportData(null),
-          }}
-          fullScreen={false}
-        >
-          <div className="p-6">
-            <p className="mb-4 text-gray-700">
-              You are about to import <strong>{reviewImportData.length}</strong>{" "}
-              records into {activeTab.title}. This will merge and overwrite
-              existing rows with matching IDs.
-            </p>
-            <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-gray-100 sticky top-0 border-b border-gray-200 z-10">
-                  <tr>
-                    {Object.keys(reviewImportData[0] || {}).map((k) => (
-                      <th
-                        key={k}
-                        className="p-3 font-semibold text-gray-800 border-r last:border-0 border-gray-200"
-                      >
-                        {k}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
-                  {reviewImportData.slice(0, 50).map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-50">
-                      {Object.values(row).map((v: any, j) => (
-                        <td
-                          key={j}
-                          className="p-3 border-r last:border-0 border-gray-100 truncate max-w-[200px] text-gray-600"
-                        >
-                          {String(v)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                  {reviewImportData.length > 50 && (
-                    <tr>
-                      <td
-                        colSpan={Object.keys(reviewImportData[0] || {}).length}
-                        className="p-4 text-center text-gray-500 font-medium bg-gray-50 italic"
-                      >
-                        ...and {reviewImportData.length - 50} more rows
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </StandardModal>
+          title="Review Finished Sizes Import"
+          columns={FINISHED_SIZE_COLUMNS}
+          initialRows={importReview.rows}
+          existingIds={finishedSizes.map((s: any) => s.id)}
+          onCancel={() => setImportReview(null)}
+          onConfirm={handleConfirmFinishedSizes}
+        />
+      )}
+      {importReview?.kind === "media" && (
+        <ImportReviewModal
+          isOpen={true}
+          title="Review Media Import"
+          columns={MEDIA_COLUMNS}
+          initialRows={importReview.rows}
+          existingIds={mediaCatalog.map((m: any) => m.id)}
+          onCancel={() => setImportReview(null)}
+          onConfirm={handleConfirmMedia}
+        />
       )}
       <div className="col-span-12 lg:col-span-3 flex flex-col gap-6 lg:self-start mb-6 md:mb-8 lg:mb-0 lg:h-full lg:overflow-y-auto lg:pr-2 lg:-mr-2 scrollbar-none pb-8">
         <div className="w-full bg-white p-6 rounded-xl shadow-sm border border-gray-200 shrink-0">

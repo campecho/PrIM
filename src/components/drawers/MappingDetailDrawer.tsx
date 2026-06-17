@@ -157,8 +157,6 @@ export function MappingDetailDrawer({
                 className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white shadow-sm"
               >
                 <option value="None assigned">None assigned</option>
-                <option value="templateId">templateId</option>
-                <option value="jdfToken">jdfToken</option>
                 <option value="JDF Token">JDF Token</option>
                 <option value="Template">Template</option>
               </select>

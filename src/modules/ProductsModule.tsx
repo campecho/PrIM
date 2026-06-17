@@ -1,5 +1,6 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useMemo } from "react";
 import { MappingDetailDrawer } from "../components/drawers/MappingDetailDrawer";
+import { ImportReviewModal, ImportColumn } from "../components/ImportReviewModal";
 import { PrintSpecDetailDrawer } from "../components/drawers/PrintSpecDetailDrawer";
 import { ProductionTypesContext } from "../context/ProductionTypesContext";
 import { INITIAL_COLORS, INITIAL_FINISHED_SIZES, INITIAL_FINISHING_OPTIONS, INITIAL_IMPRESSIONS, INITIAL_MEDIA_CATALOG, INITIAL_PRINT_SPECS } from "../data/catalog";
@@ -59,11 +60,56 @@ export function ProductsModule() {
   );
   const [mappingsSearchTerm, setMappingsSearchTerm] = useState("");
   const [selectedMapping, setSelectedMapping] = useState<any>(null);
+  const [mappingImport, setMappingImport] = useState<any[] | null>(null);
 
   const [sources] = usePersistentState<any[]>(
     "appData",
     "sources",
     INITIAL_SOURCES
+  );
+
+  const mappingImportColumns: ImportColumn[] = useMemo(
+    () => [
+      { key: "externalItemId", label: "External Item ID", type: "text", required: true },
+      { key: "internalItemId", label: "Internal Item ID (SKU)", type: "text" },
+      {
+        key: "qtyModifyType",
+        label: "QTY Modify Type",
+        type: "select",
+        width: "w-32",
+        options: [
+          { value: "none", label: "none" },
+          { value: "multiply", label: "multiply" },
+          { value: "divide", label: "divide" },
+        ],
+      },
+      { key: "qtyModifier", label: "QTY Modifier", type: "text", width: "w-24" },
+      { key: "description", label: "Description", type: "text" },
+      {
+        key: "specType",
+        label: "Spec Type",
+        type: "select",
+        required: true,
+        width: "w-36",
+        options: [
+          { value: "None assigned", label: "None assigned" },
+          { value: "JDF Token", label: "JDF Token" },
+          { value: "Template", label: "Template" },
+        ],
+      },
+      { key: "specValue", label: "Spec Value", type: "text" },
+      {
+        key: "sourceId",
+        label: "Source",
+        type: "select",
+        width: "w-40",
+        options: [
+          { value: "", label: "None" },
+          ...sources.map((s) => ({ value: s.id, label: s.name })),
+        ],
+      },
+    ],
+    [sources],
   );
 
   const [savedProducts, setSavedProducts] = usePersistentState<any[]>(
@@ -82,39 +128,63 @@ export function ProductsModule() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const rows = await parseImportedXLSX(file);
-      const imported = rows.map((row: any) => ({
+      const raw = await parseImportedXLSX(file);
+      if (raw.length === 0) {
+        alert("The selected file is empty.");
+        return;
+      }
+      const rows = raw.map((row: any) => ({
         id: row.ID || crypto.randomUUID(),
-        externalItemId: row["External Item ID"] || "",
+        externalItemId: row["External Item ID"] ?? "",
         internalItemId:
-          row["Internal Item ID (SKU)"] ||
-          row["Internal Item ID"] ||
-          row.SKU ||
+          row["Internal Item ID (SKU)"] ??
+          row["Internal Item ID"] ??
+          row.SKU ??
           "",
         qtyModifyType: row["QTY Modify Type"] || "none",
-        qtyModifier: row["QTY Modifier"] != null ? String(row["QTY Modifier"]) : "0",
-        description: row.Description || "",
+        qtyModifier:
+          row["QTY Modifier"] != null ? String(row["QTY Modifier"]) : "",
+        description: row.Description ?? "",
         specType: row["Spec Type"] || "None assigned",
-        specValue: row["Spec Value"] || "",
+        specValue: row["Spec Value"] ?? "",
         sourceId:
           row["Source ID"] ||
           sources.find((s) => s.name === row.Source)?.id ||
           "",
       }));
+      setMappingImport(rows);
+    } catch {
+      alert("Failed to parse XLSX file");
+    }
+    e.target.value = "";
+  };
+
+  const handleConfirmMappings = (rows: any[], mode: "merge" | "overwrite") => {
+    const mapped = rows.map((r) => ({
+      id: r.id,
+      externalItemId: r.externalItemId,
+      internalItemId: r.internalItemId,
+      qtyModifyType: r.qtyModifyType || "none",
+      qtyModifier: r.qtyModifier ?? "",
+      description: r.description || "",
+      specType: r.specType || "None assigned",
+      specValue: r.specValue || "",
+      sourceId: r.sourceId || "",
+    }));
+    if (mode === "overwrite") {
+      setMappings(mapped);
+    } else {
       setMappings((prev) => {
         const next = [...prev];
-        imported.forEach((m) => {
+        mapped.forEach((m) => {
           const idx = next.findIndex((x) => x.id === m.id);
           if (idx >= 0) next[idx] = { ...next[idx], ...m };
           else next.push(m);
         });
         return next;
       });
-      alert(`Imported ${imported.length} mapping(s).`);
-    } catch {
-      alert("Failed to parse XLSX file");
     }
-    e.target.value = "";
+    setMappingImport(null);
   };
 
   const handleImportProductDef = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -571,6 +641,17 @@ export function ProductsModule() {
             : undefined
         }
       />
+      {mappingImport && (
+        <ImportReviewModal
+          isOpen={true}
+          title="Review Mapping Import"
+          columns={mappingImportColumns}
+          initialRows={mappingImport}
+          existingIds={mappings.map((m) => m.id)}
+          onCancel={() => setMappingImport(null)}
+          onConfirm={handleConfirmMappings}
+        />
+      )}
       <PrintSpecDetailDrawer
         selectedSpec={selectedPrintSpec}
         onClose={() => setSelectedPrintSpec(null)}

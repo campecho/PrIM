@@ -177,9 +177,13 @@ export function ImportReviewModal({
                               }
                               className={cellClass(!!err)}
                             >
-                              <option value="" disabled>
-                                Select…
-                              </option>
+                              {col.options?.every(
+                                (o) => o.value !== (row[col.key] ?? ""),
+                              ) && (
+                                <option value="" disabled>
+                                  Select…
+                                </option>
+                              )}
                               {col.options?.map((o) => (
                                 <option key={o.value} value={o.value}>
                                   {o.label}

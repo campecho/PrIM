@@ -1,0 +1,1 @@
+export const INITIAL_FINISHED_SIZES_DATA = [];
